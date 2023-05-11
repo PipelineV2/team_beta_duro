@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  duro-backend:
+    restart: unless-stopped
+    env_file:
+      - .env
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+      labels:
+        - duro-backend
+      args:
+        - stage=${STAGE:-none}
+    volumes:
+        - ./app:/app
+    entrypoint: "./entrypoint.sh"
+    command: "dev"
+    ports:
+      - ${PORT:-5000}:${PORT:-5000}
