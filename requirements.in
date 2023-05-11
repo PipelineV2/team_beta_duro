@@ -1,0 +1,35 @@
+# The top-level dependencies are listed here.
+# Using pip-tools you can automatically generate requirements.txt.
+# This helps you segegate the top-level dependencies and makes the
+# upgrade process easier.
+
+# Here, the dependencies aren't pinned to keep them updated.
+# However, you should pin your top-level dependencies.
+
+# https://github.com/jazzband/pip-tools
+
+bcrypt
+fastapi
+passlib
+pyjwt
+python-multipart
+uvicorn
+
+# db
+psycopg2-binary
+databases[asyncpg]
+alembic
+
+# fastapi-users
+fastapi-users[sqlalchemy]
+
+loguru
+
+pyhumps
+requests
+
+frozendict
+
+boto3
+
+jinja2

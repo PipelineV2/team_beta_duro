@@ -16,8 +16,9 @@ cp .env.example .env
 
 ### 2. Setup virtual env and install dependencies
 ``` Bash
-> python3.9 -m venv venv
+> python -m venv venv
 > source ./venv/bin/activate
+> pip install pip-tools
 > make dependencies
 ```
 
