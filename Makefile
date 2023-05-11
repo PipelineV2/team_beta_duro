@@ -1,3 +1,8 @@
+dependencies:
+	@pip-compile requirements.in -o requirements.txt
+	@pip-compile requirements.in requirements-dev.in -o requirements-dev.txt
+	pip-sync requirements-dev.txt
+
 stop:
 	docker-compose down --remove-orphans
 
