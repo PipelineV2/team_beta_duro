@@ -11,6 +11,9 @@ start: stop
 
 dev: stop
 	STAGE=dev docker-compose up --build
+	
+stoplocal:
+	docker-compose -f docker-compose-with-local-db.yml down --remove-orphans
 
 devlocal: stoplocal
 	STAGE=dev docker-compose -f docker-compose-with-local-db.yml up --build
