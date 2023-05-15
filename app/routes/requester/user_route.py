@@ -14,15 +14,16 @@ from app.apis.users import (
     # fn_link_requester_to_duro_user,
     # fn_unlink_requester_from_duro_user,
 )
-
+from app.apis.queue import ( fn_create_queue_user )
 from app.db.dependency import get_repository
 from app.db.repositories import (
-    DuroUsersRepository,
+    QueueUsersRepository,
     UsersRepository,
     RequestersRepository,
+    RequesterAdministratorsRepository,
 )
 from app.models.core import DeletedCount, RecordStatus, UpdatedRecord
-from app.models.domains.duro_user import DuroUser
+from app.models.domains.queue_user import NewQueueUser, QueueUser
 from app.models.entities.core.email import Email
 from app.models.exceptions.crud_exception import (
     DuplicateAccountError,
@@ -51,26 +52,26 @@ class LinkActionEnum(str, Enum):
     tags=["requester-users"],
     name="requester:users:list",
     operation_id="requester_users_list",
-    responses={status.HTTP_200_OK: {"model": List[DuroUser]}},
+    responses={status.HTTP_200_OK: {"model": List[QueueUser]}},
 )
 async def get_users(
     request: Request,
     requester_id: uuid.UUID,
-    duro_users_repo: DuroUsersRepository = Depends(
-        get_repository(DuroUsersRepository)
+    duro_users_repo: QueueUsersRepository = Depends(
+        get_repository(QueueUsersRepository)
     ),
     # auth=Depends(get_requester),
-) -> List[DuroUser]:
+) -> List[QueueUser]:
     return await fn_get_duro_users(requester_id, duro_users_repo)
 
 
 @router.post(
-    "/{requester_id}/users",
+    "/{requester_id}/{branch_id}/users",
     tags=["requester-users"],
     name="requester:users:create",
     operation_id="requester_users_create",
     responses={
-        status.HTTP_201_CREATED: {"model": DuroUser},
+        status.HTTP_201_CREATED: {"model": QueueUser},
         status.HTTP_403_FORBIDDEN: {"model": DuplicateAccountError},
     },
     status_code=status.HTTP_201_CREATED,
@@ -78,40 +79,41 @@ async def get_users(
 async def create_user(
     request: Request,
     requester_id: uuid.UUID,
-    email: Email,
-    autolink: Optional[bool] = None,
+    branch_id: uuid.UUID,
+    user: NewQueueUser,
     requesters_repo: RequestersRepository = Depends(
         get_repository(RequestersRepository)
     ),
-    duro_users_repo: DuroUsersRepository = Depends(
-        get_repository(DuroUsersRepository)
+    requester_administrators_repo: RequesterAdministratorsRepository = Depends(
+        get_repository(RequesterAdministratorsRepository)
+    ),
+    queue_users_repo: QueueUsersRepository = Depends(
+        get_repository(QueueUsersRepository)
     ),
     requester_duro_users_repo: UsersRepository = Depends(
         get_repository(UsersRepository)
     ),
-   
+    users_repo: UsersRepository = Depends(
+        get_repository(UsersRepository)
+    ),
     # auth=Depends(get_requester),
-) -> DuroUser:
+) -> QueueUser:
     """
 
     """
-
     # requester, *_ = auth
-
-    user_id = await fn_create_duro_user(
-        requester_id, email, duro_users_repo
+    return await fn_create_queue_user(
+        requester_id, 
+        branch_id, 
+        user, 
+        requesters_repo, 
+        requester_administrators_repo, 
+        queue_users_repo,
+        requester_duro_users_repo,
+        users_repo,
     )
-    # if autolink:
-    #     await fn_link_requester_to_duro_user(
-    #         requester_id,
-    #         user_id,
-    #         requesters_repo,
-    #         duro_users_repo,
-    #         requester_duro_users_repo,
-    #     )
 
-
-    return await fn_get_duro_user(str(user_id), duro_users_repo)
+    
 
 
 @router.get(
@@ -120,7 +122,7 @@ async def create_user(
     name="requester:users:get",
     operation_id="requester_users_get",
     responses={
-        status.HTTP_200_OK: {"model": DuroUser},
+        status.HTTP_200_OK: {"model": QueueUser},
         status.HTTP_404_NOT_FOUND: {"model": NotFoundError},
     },
 )
@@ -128,11 +130,11 @@ async def get_user(
     request: Request,
     requester_id: uuid.UUID,
     account_identifier: str,
-    duro_users_repo: DuroUsersRepository = Depends(
-        get_repository(DuroUsersRepository)
+    duro_users_repo: QueueUsersRepository = Depends(
+        get_repository(QueueUsersRepository)
     ),
     # auth=Depends(get_requester),
-) -> DuroUser:
+) -> QueueUser:
     """
     """
     return await fn_get_duro_user(account_identifier, duro_users_repo)
@@ -157,8 +159,8 @@ async def get_user(
 #     requesters_repo: RequestersRepository = Depends(
 #         get_repository(RequestersRepository)
 #     ),
-#     duro_users_repo: DuroUsersRepository = Depends(
-#         get_repository(DuroUsersRepository)
+#     duro_users_repo: QueueUsersRepository = Depends(
+#         get_repository(QueueUsersRepository)
 #     ),
 #     requester_duro_users_repo: UsersRepository = Depends(
 #         get_repository(UsersRepository)
@@ -199,8 +201,8 @@ async def get_user(
 #     request: Request,
 #     user_id: uuid.UUID,
 #     status_action: StatusActionEnum,
-#     duro_users_repo: DuroUsersRepository = Depends(
-#         get_repository(DuroUsersRepository)
+#     duro_users_repo: QueueUsersRepository = Depends(
+#         get_repository(QueueUsersRepository)
 #     ),
 #     requester_duro_users_repo: UsersRepository = Depends(
 #         get_repository(UsersRepository)
@@ -244,8 +246,8 @@ async def get_user(
 #     requesters_repo: RequestersRepository = Depends(
 #         get_repository(RequestersRepository)
 #     ),
-#     duro_users_repo: DuroUsersRepository = Depends(
-#         get_repository(DuroUsersRepository)
+#     duro_users_repo: QueueUsersRepository = Depends(
+#         get_repository(QueueUsersRepository)
 #     ),
 #     requester_duro_users_repo: UsersRepository = Depends(
 #         get_repository(UsersRepository)

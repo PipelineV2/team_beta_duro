@@ -27,6 +27,7 @@ def create_users_table() -> None:
             server_default=sa.text("uuid_generate_v4()"),
         ),
         sa.Column("email", sa.VARCHAR, nullable=False),
+        sa.Column("telephone", sa.VARCHAR, nullable=True),
         sa.Column("hashed_password", sa.VARCHAR, nullable=False),
         sa.Column("is_active", sa.BOOLEAN, nullable=False),
         sa.Column("is_superuser", sa.BOOLEAN, nullable=False),
