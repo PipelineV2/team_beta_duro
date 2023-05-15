@@ -30,15 +30,15 @@ jobs:
           LATEST: "true"
 
 
-      # - name: Deploy to Server
-      #   uses: appleboy/ssh-action@master
-      #   with:
-      #     host: ${{ secrets.SSH_PRODUCTION_HOST }}
-      #     username: ${{ secrets.SSH_USERNAME }}
-      #     port: ${{ secrets.SSH_PORT }}
-      #     password: ${{ secrets.SSH_PASSWORD }}
-      #     script: |
-      #       cd /root/articean-server
-      #       docker stack deploy -c /root/articean-server/docker-compose.yml articean
-      #       docker image prune -a --force
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_PRODUCTION_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd /home/ec2-user/duro
+	          docker-compose down --remove-orphans
+            docker-compose up --build
             
