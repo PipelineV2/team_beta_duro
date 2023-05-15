@@ -34,7 +34,7 @@ jobs:
           host: ${{ secrets.SSH_PRODUCTION_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           port: ${{ secrets.SSH_PORT }}
-          key: ${{ secrets.SSH_KEY }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/ec2-user/duro
             docker pull chukwunonyeremmaxwell/team-beta-duro-backend
