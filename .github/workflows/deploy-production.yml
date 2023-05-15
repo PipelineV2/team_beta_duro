@@ -1,0 +1,44 @@
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+name: Deploy Backend
+
+jobs:
+  deploy:
+    name: Deploy to Production Environment
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+
+      - name: Docker Build & Push to Docker Hub
+        uses: opspresso/action-docker@master
+        with:
+          args: --docker
+        env:
+          USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKERFILE: "Dockerfile"
+          IMAGE_NAME: "chukwunonyeremmaxwell/team-beta-duro-backend"
+          LATEST: "true"
+
+
+      # - name: Deploy to Server
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.SSH_PRODUCTION_HOST }}
+      #     username: ${{ secrets.SSH_USERNAME }}
+      #     port: ${{ secrets.SSH_PORT }}
+      #     password: ${{ secrets.SSH_PASSWORD }}
+      #     script: |
+      #       cd /root/articean-server
+      #       docker stack deploy -c /root/articean-server/docker-compose.yml articean
+      #       docker image prune -a --force
+            
