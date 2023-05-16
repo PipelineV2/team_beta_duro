@@ -13,7 +13,7 @@ class DuroUserStatusEnum(str, Enum):
 
 
 class DuroUserBase(EmailMixin):
-    phone: str
+    telephone: str
 
 
 class DuroUser(TimestampsMixin, DuroUserBase, IDModelMixin):

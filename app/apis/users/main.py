@@ -31,7 +31,7 @@ async def fn_create_duro_user(
 ) -> Tuple[uuid.UUID, str]:
     # This is structured this way so that no user can be in more than one queue at a time.
     duro_user = await crud.fn_get_duro_user_by_email(
-        email.email, status, duro_users_repo, 
+        email, status, duro_users_repo, 
     )
 
     if duro_user is None:

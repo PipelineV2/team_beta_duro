@@ -13,12 +13,13 @@ from app.db.repositories import (
 )
 from app.apis.requesters import fn_get_requester
 from app.apis.requesters.administrators import fn_list_requester_administrators_by_request_id
-from app.apis.users import fn_get_duro_user, fn_create_duro_user
+from app.apis.users import fn_get_duro_user
 from app.models.domains.queue_user import (
     QueueUser,
     QueueStatusEnum,
     NewQueueUser,
 )
+from app.models.domains.duro_user import NewDuroUser
 from app.models.exceptions.crud_exception import (
     NotFoundException,
 )
@@ -86,9 +87,13 @@ async def fn_create_queue_user(
     )
 
     if duro_user is None:
+        from app.apis.users.crud import fn_create_duro_user
         _ = await fn_create_duro_user(
             requester_id,
-            queue_user.email,
+            NewDuroUser (
+                email=queue_user.email,
+                telephone=queue_user.telephone,
+            ),
             duro_users_repo,
         )
     
