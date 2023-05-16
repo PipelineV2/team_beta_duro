@@ -1,3 +1,7 @@
+# Your workflow name.
+name: Deploy to heroku.
+
+# Run workflow on every push to master branch.
 on:
   push:
     branches:
@@ -6,37 +10,22 @@ on:
     branches:
       - main
 
-name: Deploy Backend
-
+# Your workflows jobs.
 jobs:
-  deploy:
-    name: Deploy to Production Environment
+  build:
     runs-on: ubuntu-latest
-
     steps:
+      # Check-out your repository.
       - name: Checkout
         uses: actions/checkout@v2
 
-
-      - name: Docker Build & Push to Docker Hub
-        uses: opspresso/action-docker@master
+      - name: Build, Push and Release a Docker container to Heroku. # Your custom step name
+        uses: gonuit/heroku-docker-deploy@v1.3.3 # GitHub action name (leave it as it is).
         with:
-          args: --docker
-        env:
-          USERNAME: ${{ secrets.DOCKER_USERNAME }}
-          PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-          DOCKERFILE: "Dockerfile"
-          IMAGE_NAME: "chukwunonyeremmaxwell/team-beta-duro-backend"
-          LATEST: "true"
-      - name: Deploy to Server
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_PRODUCTION_HOST }}
-          username: ${{ secrets.SSH_USERNAME }}
-          port: ${{ secrets.SSH_PORT }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd /home/ec2-user/duro
-            docker pull chukwunonyeremmaxwell/team-beta-duro-backend
-            docker-compose up --build -d
-            
+          email: ${{ secrets.HEROKU_EMAIL }}
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          dockerfile_directory: ./
+          dockerfile_name: Dockerfile
+          docker_options: "--no-cache"
+          process_type: web
