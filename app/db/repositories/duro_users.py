@@ -11,34 +11,31 @@ from app.models.domains.duro_user import (
 )
 
 NEW_Duro_USER_SQL = """
-    INSERT INTO duro_users(email, url, created_by_requester_id)
-    VALUES(:email, :url, :created_by_requester_id)
+    INSERT INTO users(email, telephone, created_by_requester_id)
+    VALUES(:email, :telephone, :created_by_requester_id)
     RETURNING id;
 """
 
 LIST_Duro_USERS_SQL = """
-    SELECT id, email, url, verified_at, status, created_at, updated_at, deleted_at, created_by_requester_id
-    FROM duro_users WHERE created_by_requester_id=:created_by_requester_id;
+    SELECT id, email, telephone,  created_at, updated_at, deleted_at, created_by_requester_id
+    FROM users WHERE created_by_requester_id=:created_by_requester_id;
 """
 
 GET_Duro_USER_SQL = """
-    SELECT id, email, url, verified_at, status, created_at, updated_at, deleted_at FROM duro_users WHERE id=:id AND status=:status;
+    SELECT id, email, telephone, created_at, updated_at, deleted_at FROM users WHERE id=:id;
 """
 
 GET_Duro_USER_BY_EMAIL_SQL = """
-    SELECT id, email, url, verified_at, status, created_at, updated_at, deleted_at FROM duro_users WHERE email=:email AND status=:status;
+    SELECT id, email, telephone, created_at, updated_at, deleted_at FROM users WHERE email=:email;
 """
 
 DELETE_Duro_USER_SQL = """
-    DELETE FROM duro_users WHERE id=:id RETURNING id;
+    DELETE FROM users WHERE id=:id RETURNING id;
 """
 
-SET_Duro_USER_STATUS_SQL = """
-    UPDATE duro_users SET status=:status, updated_at=now() WHERE id=:id RETURNING id, status, updated_at;
-"""
 
 SET_Duro_USER_VERIFIED_SQL = """
-    UPDATE Duro_users SET verified_at=now(), updated_at=now() WHERE id=:id RETURNING id, updated_at;
+    UPDATE users SET now(), updated_at=now() WHERE id=:id RETURNING id, updated_at;
 """
 
 
@@ -67,7 +64,7 @@ class DuroUsersRepository(BaseRepository):
     async def get_duro_user(
         self, *, email: str, status: DuroUserStatusEnum,
     ) -> Optional[DuroUser]:
-        query_values = {"email": email, "status": status}
+        query_values = {"email": email}
         return await self._get_duro_user_impl(
             GET_Duro_USER_SQL, query_values
         )
@@ -75,7 +72,7 @@ class DuroUsersRepository(BaseRepository):
     async def get_duro_user_by_email(
         self, *, email: str, status: DuroUserStatusEnum,
     ) -> Optional[DuroUser]:
-        query_values = {"email": email, "status": status}
+        query_values = {"email": email}
         return await self._get_duro_user_impl(
             GET_Duro_USER_BY_EMAIL_SQL, query_values
         )
@@ -95,31 +92,31 @@ class DuroUsersRepository(BaseRepository):
             None if Duro_user is None else DuroUser(**Duro_user)
         )
 
-    async def activate_duro_user(
-        self, *, id: uuid.UUID
-    ) -> Optional[RecordStatus]:
-        return await self._set_duro_user_status_impl(
-            id, DuroUserStatusEnum.active
-        )
+    # async def activate_duro_user(
+    #     self, *, id: uuid.UUID
+    # ) -> Optional[RecordStatus]:
+    #     return await self._set_duro_user_status_impl(
+    #         id, DuroUserStatusEnum.active
+    #     )
 
-    async def inactivate_duro_user(
-        self, *, id: uuid.UUID
-    ) -> Optional[RecordStatus]:
-        return await self._set_duro_user_status_impl(
-            id, DuroUserStatusEnum.inactive
-        )
+    # async def inactivate_duro_user(
+    #     self, *, id: uuid.UUID
+    # ) -> Optional[RecordStatus]:
+    #     return await self._set_duro_user_status_impl(
+    #         id, DuroUserStatusEnum.inactive
+    #     )
 
-    async def _set_duro_user_status_impl(
-        self,
-        id: uuid.UUID,
-        status: DuroUserStatusEnum,
-    ) -> Optional[RecordStatus]:
-        query_values = {"id": id, "status": status}
+    # async def _set_duro_user_status_impl(
+    #     self,
+    #     id: uuid.UUID,
+    #     status: DuroUserStatusEnum,
+    # ) -> Optional[RecordStatus]:
+    #     query_values = {"id": id, "status": status}
 
-        record_status = await self.db.fetch_one(
-            query=SET_Duro_USER_STATUS_SQL, values=query_values
-        )
-        return None if record_status is None else RecordStatus(**record_status)
+    #     record_status = await self.db.fetch_one(
+    #         query=SET_Duro_USER_STATUS_SQL, values=query_values
+    #     )
+    #     return None if record_status is None else RecordStatus(**record_status)
 
     async def set_duro_user_verified(
         self,
