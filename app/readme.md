@@ -8,5 +8,7 @@
 ## psql command
 > docker ps  
 > docker exec -it <container_id> psql -U postgres -d duro_team_beta
+> CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+> ALTER TABLE queue_users ADD CONSTRAINT uq_email_device_telephone UNIQUE (device_id, email, telephone);
 > \dt
-> 
+> \d+ <table_name> to confirm table schema changes

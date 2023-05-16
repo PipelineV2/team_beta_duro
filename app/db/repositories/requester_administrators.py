@@ -53,11 +53,14 @@ class RequesterAdministratorsRepository(BaseRepository):
         requester_administrators = await self.db.fetch_all(
             query=LIST_REQUESTER_ADMINISTRATORS_BY_REQUEST_ID_SQL, values=query_values
         )
-        return [
+        
+        admins = [
             RequesterAdministrator(**requester_administrator)
             for requester_administrator in requester_administrators
         ]
-
+        
+        return admins
+    
     async def get_requester_administrator_id_by_email(
         self, *, email: str
     ) -> Optional[IDModelMixin]:

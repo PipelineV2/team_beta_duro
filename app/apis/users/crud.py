@@ -31,7 +31,9 @@ async def fn_get_duro_user(
 
 
 async def fn_get_duro_user_by_email(
-    email: str, status: DuroUserStatusEnum, duro_users_repo: DuroUsersRepository, 
+    email: str, 
+    duro_users_repo: DuroUsersRepository, 
+    status: Optional[DuroUserStatusEnum] = DuroUserStatusEnum.active, 
 ) -> Optional[DuroUser]:
     return await duro_users_repo.get_duro_user_by_email(email=email, status=status)
 

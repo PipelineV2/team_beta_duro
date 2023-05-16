@@ -5,6 +5,7 @@ from typing import Optional, List
 
 from app.models.core import IDModelMixin
 from app.models.entities.core.email import EmailMixin
+from app.models.entities.person import PersonBase
 
 
 class QueueStatusEnum(str, Enum):
@@ -12,9 +13,9 @@ class QueueStatusEnum(str, Enum):
     inactive = "inactive"
 
 
-class QueueBase(EmailMixin):
-    phone: str
-    device_id: uuid.UUID
+class QueueBase(PersonBase):
+    ...
+    
     
 
 class QueueUser(QueueBase, IDModelMixin):
@@ -26,8 +27,10 @@ class QueueUser(QueueBase, IDModelMixin):
 class QueueUserDBModel(QueueUser):
     created_by_requester_id: uuid.UUID
     created_by_administrator_id: uuid.UUID
+    device_id: uuid.UUID
     
 
 class NewQueueUser(QueueBase):
-    location: List[float, float]
+    location: List[float]
+    device_id: uuid.UUID
     

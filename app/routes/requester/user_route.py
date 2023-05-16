@@ -5,20 +5,23 @@ from typing import List, Optional, Union
 from fastapi import APIRouter, Depends, Request, Response, status
 
 from app.apis.users import (
-    fn_activate_duro_user,
-    fn_create_duro_user,
-    # fn_delete_duro_user,
-    fn_get_duro_user,
+    # fn_activate_duro_user,
+    # fn_create_duro_user,
+    # # fn_delete_duro_user,
+    # fn_get_duro_user,
     fn_get_duro_users,
     # fn_inactivate_duro_user,
     # fn_link_requester_to_duro_user,
     # fn_unlink_requester_from_duro_user,
 )
-from app.apis.queue import ( fn_create_queue_user )
+from app.apis.queue import ( 
+    fn_create_queue_user,
+    fn_get_queue_user_telephone
+)
 from app.db.dependency import get_repository
 from app.db.repositories import (
     QueueUsersRepository,
-    UsersRepository,
+    DuroUsersRepository,
     RequestersRepository,
     RequesterAdministratorsRepository,
 )
@@ -48,10 +51,10 @@ class LinkActionEnum(str, Enum):
 
 
 @router.get(
-    "/{requester_id}/users",
-    tags=["requester-users"],
-    name="requester:users:list",
-    operation_id="requester_users_list",
+    "/{requester_id}/queue_users",
+    tags=["queue-users"],
+    name="requester:queue_users:list",
+    operation_id="requester_queue_users_list",
     responses={status.HTTP_200_OK: {"model": List[QueueUser]}},
 )
 async def get_users(
@@ -66,20 +69,20 @@ async def get_users(
 
 
 @router.post(
-    "/{requester_id}/{branch_id}/users",
-    tags=["requester-users"],
-    name="requester:users:create",
-    operation_id="requester_users_create",
+    "/{coperate_id}/{administrator_id}/queue",
+    tags=["queue-users"],
+    name="requester:queue_user:create",
+    operation_id="requester_queue_users_create",
     responses={
         status.HTTP_201_CREATED: {"model": QueueUser},
         status.HTTP_403_FORBIDDEN: {"model": DuplicateAccountError},
     },
     status_code=status.HTTP_201_CREATED,
 )
-async def create_user(
+async def create_queue_user(
     request: Request,
-    requester_id: uuid.UUID,
-    branch_id: uuid.UUID,
+    coperate_id: uuid.UUID,
+    administrator_id: uuid.UUID,
     user: NewQueueUser,
     requesters_repo: RequestersRepository = Depends(
         get_repository(RequestersRepository)
@@ -90,12 +93,10 @@ async def create_user(
     queue_users_repo: QueueUsersRepository = Depends(
         get_repository(QueueUsersRepository)
     ),
-    requester_duro_users_repo: UsersRepository = Depends(
-        get_repository(UsersRepository)
+    duro_users_repo: DuroUsersRepository = Depends(
+        get_repository(DuroUsersRepository)
     ),
-    users_repo: UsersRepository = Depends(
-        get_repository(UsersRepository)
-    ),
+    
     # auth=Depends(get_requester),
 ) -> QueueUser:
     """
@@ -103,41 +104,57 @@ async def create_user(
     """
     # requester, *_ = auth
     return await fn_create_queue_user(
-        requester_id, 
-        branch_id, 
+        coperate_id, 
+        administrator_id, 
         user, 
-        requesters_repo, 
-        requester_administrators_repo, 
+        requesters_repo,
+        requester_administrators_repo,
         queue_users_repo,
-        requester_duro_users_repo,
-        users_repo,
+        duro_users_repo,
     )
-
-    
 
 
 @router.get(
-    "/{requester_id}/users/{account_identifier}",
-    tags=["requester-users"],
-    name="requester:users:get",
-    operation_id="requester_users_get",
-    responses={
-        status.HTTP_200_OK: {"model": QueueUser},
-        status.HTTP_404_NOT_FOUND: {"model": NotFoundError},
-    },
+    "/{requester_id}/queue_users/telephone",
+    tags=["queue-users"],
+    name="requester:queue_users:telephone",
+    operation_id="requester_queue_user_telephone",
+    responses={status.HTTP_200_OK: {"model": QueueUser}},
 )
-async def get_user(
+async def get_queue_user_telephone(
     request: Request,
     requester_id: uuid.UUID,
-    account_identifier: str,
+    telehone: str,
     duro_users_repo: QueueUsersRepository = Depends(
         get_repository(QueueUsersRepository)
     ),
     # auth=Depends(get_requester),
 ) -> QueueUser:
-    """
-    """
-    return await fn_get_duro_user(account_identifier, duro_users_repo)
+    return await fn_get_queue_user_telephone(requester_id, duro_users_repo)
+
+
+# @router.get(
+#     "/{requester_id}/users/{account_identifier}",
+#     tags=["requester-users"],
+#     name="requester:users:get",
+#     operation_id="requester_users_get",
+#     responses={
+#         status.HTTP_200_OK: {"model": QueueUser},
+#         status.HTTP_404_NOT_FOUND: {"model": NotFoundError},
+#     },
+# )
+# async def get_user(
+#     request: Request,
+#     requester_id: uuid.UUID,
+#     account_identifier: str,
+#     duro_users_repo: QueueUsersRepository = Depends(
+#         get_repository(QueueUsersRepository)
+#     ),
+#     # auth=Depends(get_requester),
+# ) -> QueueUser:
+#     """
+#     """
+#     return await fn_get_duro_user(account_identifier, duro_users_repo)
 
 
 # @router.delete(
