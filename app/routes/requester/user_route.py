@@ -27,6 +27,7 @@ from app.db.repositories import (
 )
 from app.models.core import DeletedCount, RecordStatus, UpdatedRecord
 from app.models.domains.queue_user import NewQueueUser, QueueUser
+from app.models.domains.duro_user import NewDuroUser
 from app.models.entities.core.email import Email
 from app.models.exceptions.crud_exception import (
     DuplicateAccountError,

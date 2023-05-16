@@ -11,14 +11,14 @@ from app.models.domains.duro_user import (
 )
 
 NEW_Duro_USER_SQL = """
-    INSERT INTO users(email, telephone, created_by_requester_id)
-    VALUES(:email, :telephone, :created_by_requester_id)
+    INSERT INTO users(email, telephone, hashed_password, is_active, is_superuser, is_verified, role_reference_id)
+    VALUES(:email, :telephone, :hashed_password, :is_active, :is_superuser, :is_verified, :role_reference_id)
     RETURNING id;
 """
 
 LIST_Duro_USERS_SQL = """
-    SELECT id, email, telephone,  created_at, updated_at, deleted_at, created_by_requester_id
-    FROM users WHERE created_by_requester_id=:created_by_requester_id;
+    SELECT id, email, telephone,  created_at, updated_at, deleted_at, role_reference_id
+    FROM users WHERE role_reference_id=:role_reference_id;
 """
 
 GET_Duro_USER_SQL = """
@@ -41,24 +41,27 @@ SET_Duro_USER_VERIFIED_SQL = """
 
 class DuroUsersRepository(BaseRepository):
     async def create_duro_user(
-        self, *, requester_id: uuid.UUID, new_Duro_user: NewDuroUser
+        self, *, requester_id: uuid.UUID, new_duro_user: NewDuroUser
     ) -> IDModelMixin:
-        query_values = new_Duro_user.dict()
-        query_values["created_by_requester_id"] = requester_id
-
+        query_values = new_duro_user.dict()
+        query_values["role_reference_id"] = str(requester_id)
+        query_values["hashed_password"] = str(requester_id)
+        query_values["is_active"] = True
+        query_values["is_superuser"] = False
+        query_values["is_verified"] = True
         created_Duro_user = await self.db.fetch_one(
             query=NEW_Duro_USER_SQL, values=query_values
         )
         return IDModelMixin(**created_Duro_user)
 
     async def get_duro_users(self,*, requester_id: uuid.UUID,) -> List[DuroUser]:
-        query_values = {"created_by_requester_id": requester_id}
-        Duro_users = await self.db.fetch_all(
+        query_values = {"role_reference_id": str(requester_id)}
+        duro_users = await self.db.fetch_all(
             query=LIST_Duro_USERS_SQL, values=query_values
         )
         return [
-            DuroUser(**Duro_user)
-            for Duro_user in Duro_users
+            DuroUser(**duro_user)
+            for duro_user in duro_users
         ]
 
     async def get_duro_user(
