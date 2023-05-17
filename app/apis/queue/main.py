@@ -101,7 +101,9 @@ async def fn_create_queue_user(
 
 
 async def fn_get_queue_user_telephone(
-    telephone: uuid.UUID, 
+    requester_id: uuid.UUID,
+    administrator_id: uuid.UUID,
+    telephone: str, 
     queue_users_repo: QueueUsersRepository,
     status: Optional[QueueStatusEnum] = QueueStatusEnum.active, 
 ) -> Optional[QueueUser]:

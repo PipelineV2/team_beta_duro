@@ -35,7 +35,7 @@ async def fn_get_queue_user(
     return await queue_users_repo.get_queue_user(id=id, status=status)
 
 async def fn_get_queue_user_telephone(
-    telephone: uuid.UUID, 
+    telephone: str, 
     queue_users_repo: QueueUsersRepository,
     status: Optional[QueueStatusEnum] = QueueStatusEnum.active, 
 ) -> Optional[QueueUser]:
