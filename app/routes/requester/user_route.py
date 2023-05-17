@@ -116,7 +116,7 @@ async def create_queue_user(
 
 
 @router.get(
-    "/{requester_id}/queue_users/telephone",
+    "/{requester_id}/{administrator_id}/queue_users/telephone",
     tags=["queue-users"],
     name="requester:queue_users:telephone",
     operation_id="requester_queue_user_telephone",
@@ -125,13 +125,14 @@ async def create_queue_user(
 async def get_queue_user_telephone(
     request: Request,
     requester_id: uuid.UUID,
+    administrator_id: uuid.UUID,
     telehone: str,
     duro_users_repo: QueueUsersRepository = Depends(
         get_repository(QueueUsersRepository)
     ),
     # auth=Depends(get_requester),
 ) -> QueueUser:
-    return await fn_get_queue_user_telephone(requester_id, duro_users_repo)
+    return await fn_get_queue_user_telephone(requester_id, administrator_id, telehone, duro_users_repo)
 
 
 # @router.get(

@@ -20,8 +20,8 @@ UPSERT_QUEUE_USER = """
 """
 
 SQL_GET_QUEUE_USERS = """
-    SELECT telephone, email, device_id, status, time_queued, created_by_requester_id, created_by_administrator_id FROM queue_users WHERE status=status AND
-    created_by_requester_id=created_by_requester_id AND created_by_administrator_id=created_by_administrator_id;
+    SELECT telephone, email, device_id, status, time_queued, created_by_requester_id, created_by_administrator_id FROM queue_users WHERE status=:status AND
+    created_by_requester_id=:created_by_requester_id AND created_by_administrator_id=:created_by_administrator_id;
 """
 
 SQL_GET_QUEUE_USER = """
@@ -29,7 +29,7 @@ SQL_GET_QUEUE_USER = """
 """
 
 SQL_GET_QUEUE_USER_TELEPHONE = """
-    SELECT telephone, email, device_id, status, time_queued FROM queue_users WHERE status=status AND telephone=telephone;
+    SELECT telephone, email, device_id, status, time_queued FROM queue_users WHERE status=:status AND telephone=:telephone;
 """
 
 
@@ -94,7 +94,7 @@ class QueueUsersRepository(BaseRepository):
     async def get_queue_user_telephone(
         self,
         *,
-        telephone: uuid.UUID, 
+        telephone: str, 
         status: QueueStatusEnum, 
     ) -> Optional[QueueUser]:
         query_values = {
@@ -104,4 +104,5 @@ class QueueUsersRepository(BaseRepository):
         queue_user = await self.db.fetch_one(
             query=SQL_GET_QUEUE_USER_TELEPHONE, values=query_values
         )
-        return QueueUser(**queue_user)
+        queue_user = QueueUser(**queue_user)
+        return queue_user
