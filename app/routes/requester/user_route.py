@@ -52,7 +52,7 @@ class LinkActionEnum(str, Enum):
 
 
 @router.get(
-    "/{requester_id}/queue_users",
+    "/{coperate_id}/queue_users",
     tags=["queue-users"],
     name="requester:queue_users:list",
     operation_id="requester_queue_users_list",
@@ -60,17 +60,17 @@ class LinkActionEnum(str, Enum):
 )
 async def get_users(
     request: Request,
-    requester_id: uuid.UUID,
+    coperate_id: uuid.UUID,
     duro_users_repo: QueueUsersRepository = Depends(
         get_repository(QueueUsersRepository)
     ),
     # auth=Depends(get_requester),
 ) -> List[QueueUser]:
-    return await fn_get_duro_users(requester_id, duro_users_repo)
+    return await fn_get_duro_users(coperate_id, duro_users_repo)
 
 
 @router.post(
-    "/{coperate_id}/{administrator_id}/queue",
+    "/{coperate_name}/{administrator_name}/queue",
     tags=["queue-users"],
     name="requester:queue_user:create",
     operation_id="requester_queue_users_create",
@@ -82,8 +82,8 @@ async def get_users(
 )
 async def create_queue_user(
     request: Request,
-    coperate_id: uuid.UUID,
-    administrator_id: uuid.UUID,
+    coperate_name: str,
+    administrator_name: str,
     user: NewQueueUser,
     requesters_repo: RequestersRepository = Depends(
         get_repository(RequestersRepository)
@@ -105,8 +105,8 @@ async def create_queue_user(
     """
     # requester, *_ = auth
     return await fn_create_queue_user(
-        coperate_id, 
-        administrator_id, 
+        coperate_name, 
+        administrator_name, 
         user, 
         requesters_repo,
         requester_administrators_repo,
@@ -116,7 +116,7 @@ async def create_queue_user(
 
 
 @router.get(
-    "/{requester_id}/{administrator_id}/queue_users/telephone",
+    "/{coperate_name}/{administrator_name}/queue_users/telephone",
     tags=["queue-users"],
     name="requester:queue_users:telephone",
     operation_id="requester_queue_user_telephone",
@@ -124,19 +124,32 @@ async def create_queue_user(
 )
 async def get_queue_user_telephone(
     request: Request,
-    requester_id: uuid.UUID,
-    administrator_id: uuid.UUID,
+    coperate_name: uuid.UUID,
+    administrator_name: uuid.UUID,
     telehone: str,
     duro_users_repo: QueueUsersRepository = Depends(
         get_repository(QueueUsersRepository)
     ),
+    requesters_repo: RequestersRepository = Depends(
+        get_repository(RequestersRepository)
+    ),
+    requester_administrators_repo: RequesterAdministratorsRepository = Depends(
+        get_repository(RequesterAdministratorsRepository)
+    ),
     # auth=Depends(get_requester),
 ) -> QueueUser:
-    return await fn_get_queue_user_telephone(requester_id, administrator_id, telehone, duro_users_repo)
+    return await fn_get_queue_user_telephone(
+        coperate_name, 
+        administrator_name, 
+        telehone, 
+        duro_users_repo, 
+        requesters_repo, 
+        requester_administrators_repo 
+    )
 
 
 # @router.get(
-#     "/{requester_id}/users/{account_identifier}",
+#     "/{coperate_id}/users/{account_identifier}",
 #     tags=["requester-users"],
 #     name="requester:users:get",
 #     operation_id="requester_users_get",
@@ -147,7 +160,7 @@ async def get_queue_user_telephone(
 # )
 # async def get_user(
 #     request: Request,
-#     requester_id: uuid.UUID,
+#     coperate_id: uuid.UUID,
 #     account_identifier: str,
 #     duro_users_repo: QueueUsersRepository = Depends(
 #         get_repository(QueueUsersRepository)
@@ -160,7 +173,7 @@ async def get_queue_user_telephone(
 
 
 # @router.delete(
-#     "/{requester_id}/{user_id}",
+#     "/{coperate_id}/{user_id}",
 #     tags=["requester-users"],
 #     name="requester:users:delete",
 #     operation_id="requester_users_delete",
@@ -172,7 +185,7 @@ async def get_queue_user_telephone(
 # )
 # async def delete_user(
 #     request: Request,
-#     requester_id: uuid.UUID,
+#     coperate_id: uuid.UUID,
 #     user_id: uuid.UUID,
 #     autounlink: Optional[bool] = None,
 #     requesters_repo: RequestersRepository = Depends(
@@ -191,7 +204,7 @@ async def get_queue_user_telephone(
 #     # requester, *_ = auth
 #     if autounlink:
 #         await fn_unlink_requester_from_duro_user(
-#             requester_id,
+#             coperate_id,
 #             user_id,
 #             requesters_repo,
 #             duro_users_repo,

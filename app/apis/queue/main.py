@@ -2,7 +2,7 @@ from __future__ import annotations
 
 
 import uuid
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 from app.db.repositories import (
     QueueUsersRepository,
@@ -11,8 +11,10 @@ from app.db.repositories import (
     RequesterAdministratorsRepository,
     DuroUsersRepository,
 )
-from app.apis.requesters import fn_get_requester
-from app.apis.requesters.administrators import fn_list_requester_administrators_by_request_id
+from app.apis.requesters.crud import (
+    validate_coporate_name_and_admin_user_name,
+    validate_requester_and_admin,
+)
 from app.apis.users import fn_get_duro_user
 from app.models.domains.queue_user import (
     QueueUser,
@@ -28,8 +30,8 @@ from . import crud
 
 
 async def fn_create_queue_user(
-    requester_id: uuid.UUID,
-    administrator_id: uuid.UUID,
+    coporate_name: str,
+    admin_name: str,
     user: NewQueueUser,
     requesters_repo: RequestersRepository,
     requester_administrators_repo: RequesterAdministratorsRepository,
@@ -37,27 +39,16 @@ async def fn_create_queue_user(
     duro_users_repo: DuroUsersRepository,
 ) -> Optional[QueueUser]:
     
-    # Check that the queue requester exist
-    _ = await fn_get_requester(
-        requester_id, 
+    # Validate that the coperate entity and administrator exist
+    requester_id,  administrator_id = await validate_coporate_name_and_admin_user_name(
+        coporate_name,
+        admin_name,
         requesters_repo,
-        raise_not_found_exception=True
-        )
-    
-    # Get registered administrators for this requester
-    admins = await fn_list_requester_administrators_by_request_id(
-        requester_id,
         requester_administrators_repo,
     )
     
-    # Get admins ids
-    admin_ids = [admin.id for admin in admins]
     
-    # Check that administrator's id exists
-    if administrator_id not in admin_ids:
-        raise NotFoundException(message="Requester administrator not found.")
-    
-    # Before you queue the user you have to first confirm that the user location is withing the administrator's location
+    # Before you queue the user you have to first confirm that the user location is within the administrator's location
     
     # Also check that the user is not in an existing queue with QueueStatusEnum
     
@@ -68,8 +59,6 @@ async def fn_create_queue_user(
         user,
         queue_users_repo
     )
-    
-    print("queue users created: ", new_queue_user)
     
     queue_user = await crud.fn_get_queue_user(
         id=new_queue_user.id,
@@ -101,19 +90,48 @@ async def fn_create_queue_user(
 
 
 async def fn_get_queue_user_telephone(
-    requester_id: uuid.UUID,
-    administrator_id: uuid.UUID,
+    coporate_name: str,
+    admin_name: str,
     telephone: str, 
     queue_users_repo: QueueUsersRepository,
+    requesters_repo: RequestersRepository,
+    requester_administrators_repo: RequesterAdministratorsRepository,
     status: Optional[QueueStatusEnum] = QueueStatusEnum.active, 
 ) -> Optional[QueueUser]:
+    
+    # Validate that the coperate entity and administrator exist
+    # Validate that the coperate entity and administrator exist
+    requester_id,  administrator_id = await validate_coporate_name_and_admin_user_name(
+        coporate_name,
+        admin_name,
+        requesters_repo,
+        requester_administrators_repo,
+    )
     queue_user = await crud.fn_get_queue_user_telephone(
         telephone=telephone, 
         status=status, 
         queue_users_repo=queue_users_repo
     ) 
 
-    # if queue_user is None:
-    #     raise NotFoundException(message="Telephone number not found.")
-    
     return queue_user
+
+async def fn_get_queue_users(
+    requester_id: uuid.UUID,
+    administrator_id: uuid.UUID,
+    status: QueueStatusEnum,
+    requesters_repo: RequestersRepository,
+    requester_administrators_repo: RequesterAdministratorsRepository,
+    queue_users_repo: QueueUsersRepository,
+    ) -> List[QueueUser]:
+    
+    _ = await validate_requester_and_admin(
+        requester_id, 
+        administrator_id,
+        requesters_repo, 
+        requester_administrators_repo,
+        raise_not_found_exception=True
+    )
+    
+    queu_users = await crud.fn_get_queue_users(requester_id, administrator_id, status, queue_users_repo)
+    
+    return queu_users
