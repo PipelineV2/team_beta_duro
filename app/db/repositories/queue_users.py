@@ -15,7 +15,6 @@ from app.models.domains.queue_user import (
 UPSERT_QUEUE_USER = """
     INSERT INTO queue_users(email, telephone, device_id,  given_name, family_name, display_name, status, job_title, time_queued, time_dequeued, created_by_requester_id, created_by_administrator_id)
     VALUES(:email, :telephone, :device_id, :given_name, :family_name, :display_name, :status, :job_title, :time_queued, :time_dequeued, :created_by_requester_id, :created_by_administrator_id)
-    ON CONFLICT(email, device_id, telephone) DO UPDATE SET created_by_requester_id=EXCLUDED.created_by_requester_id, created_by_administrator_id=EXCLUDED.created_by_administrator_id, time_queued=EXCLUDED.time_queued, status=EXCLUDED.status
     RETURNING id, email, telephone, device_id, time_queued;
 """
 

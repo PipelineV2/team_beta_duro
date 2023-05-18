@@ -41,8 +41,27 @@ def create_requesters_table() -> None:
 
     authorize_duro("requesters", op)
 
+def create_constraints():
+    op.create_unique_constraint(
+        "uq_requesters_email",
+        "requesters",
+        ["email"]
+    )
+
+    op.create_unique_constraint(
+        "uq_requesters_telephone",
+        "requesters",
+        ["telephone"]
+    )
+    op.create_unique_constraint(
+        "uq_requesters_legal_name",
+        "requesters",
+        ["legal_name"]
+    )
+
 def upgrade() -> None:
     create_requesters_table()
+    create_constraints()
 
 
 def downgrade() -> None:

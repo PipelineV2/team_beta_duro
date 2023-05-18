@@ -29,6 +29,10 @@ GET_REQUESTER_ID_BY_EMAIL_SQL = """
     SELECT id FROM requesters WHERE email=:email;
 """
 
+GET_REQUESTER_BY_LEGAL_NAME_SQL ="""
+    SELECT * FROM requesters WHERE legal_name=:legal_name;
+"""
+
 DELETE_REQUESTER_SQL = """
     DELETE FROM requesters WHERE id=:id RETURNING id;
 """
@@ -79,6 +83,14 @@ class RequestersRepository(BaseRepository):
             query=GET_REQUESTER_SQL, values=query_values
         )
         return None if requester is None else Requester(**requester)
+    
+    async def get_requester_by_name(self, legal_name: str) -> Optional[Requester]:
+        query_values = {"legal_name": legal_name}
+        requester = await self.db.fetch_one(
+            query=GET_REQUESTER_BY_LEGAL_NAME_SQL, values=query_values
+        )
+        return None if requester is None else Requester(**requester)
+        
 
     async def get_requester_id_by_email(self, *, email: str) -> Optional[IDModelMixin]:
         query_values = {"email": email}
