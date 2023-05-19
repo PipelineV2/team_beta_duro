@@ -24,6 +24,7 @@ from app.models.domains.queue_user import (
 from app.models.domains.duro_user import NewDuroUser
 from app.models.exceptions.crud_exception import (
     NotFoundException,
+    DuplicateDataException,
 )
 
 from . import crud
@@ -51,7 +52,19 @@ async def fn_create_queue_user(
     # Before you queue the user you have to first confirm that the user location is within the administrator's location
     
     # Also check that the user is not in an existing queue with QueueStatusEnum
-    
+    queue_users = await crud.fn_get_queue_users_list(
+        user.device_id,
+        user.email,
+        user.telephone,
+        QueueStatusEnum.active,
+        queue_users_repo,
+    )
+    print("\n")
+    print("queue_users: ", queue_users)
+    # Check if queue user exists
+    if queue_users :
+        raise DuplicateDataException(current_record_id = uuid.uuid4(), message="A user with these details is on the queue.")
+
     # Queue the user
     new_queue_user = await crud.fn_create_queue_user(
         requester_id, 

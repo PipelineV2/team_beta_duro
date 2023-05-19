@@ -31,6 +31,9 @@ SQL_GET_QUEUE_USER_TELEPHONE = """
     SELECT telephone, email, device_id, status, time_queued FROM queue_users WHERE status=:status AND telephone=:telephone;
 """
 
+SQL_GET_QUEUE_USERS_DEVICE_ID_TELEPHONE_EMAIL = """
+    SELECT * FROM queue_users WHERE {};
+"""
 
 class QueueUsersRepository(BaseRepository):
     async def create_queue_user(
@@ -90,6 +93,7 @@ class QueueUsersRepository(BaseRepository):
         )
         return QueueUser(**queue_user)
     
+    
     async def get_queue_user_telephone(
         self,
         *,
@@ -105,3 +109,34 @@ class QueueUsersRepository(BaseRepository):
         )
         queue_user = QueueUser(**queue_user)
         return queue_user
+    
+    
+    async def get_queue_users_list(
+        self,
+        *,
+        device_id: uuid.UUID,
+        email: str,
+        telephone: str,
+        status: QueueStatusEnum,
+    ) -> List[QueueUser]:
+
+        conditions = []
+        if device_id is not None:
+            conditions.append("device_id='{}'".format(device_id))
+        if email is not None:
+            conditions.append("email='{}'".format(email))
+        if telephone is not None:
+            conditions.append("telephone='{}'".format(telephone))
+
+        condition_str = "TRUE" if not conditions else " OR ".join(conditions)
+        if status is not None:
+            print("status is not none")
+            condition_str = condition_str + " AND status='{}'".format(status)
+        print("condition_str: ", condition_str)
+        query = SQL_GET_QUEUE_USERS_DEVICE_ID_TELEPHONE_EMAIL.format(condition_str)
+
+        queue_users = await self.db.fetch_all(query=query)
+        return [
+            QueueUser(**queue_user)
+            for queue_user in queue_users
+        ]
