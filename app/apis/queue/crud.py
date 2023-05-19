@@ -17,6 +17,7 @@ async def fn_create_queue_user(
         requester_id=requester_id, administrator_id=administrator_id, new_queue_user=new_queue_user
     )
 
+
 async def fn_get_queue_users(
     requester_id: uuid.UUID,
     administrator_id: uuid.UUID,
@@ -27,12 +28,14 @@ async def fn_get_queue_users(
         requester_id=requester_id, administrator_id=administrator_id, status=status
     )
     
+    
 async def fn_get_queue_user(
     id: uuid.UUID, 
-    status: QueueStatusEnum, 
+    status:  QueueStatusEnum, 
     queue_users_repo: QueueUsersRepository
 ) -> Optional[QueueUser]:
     return await queue_users_repo.get_queue_user(id=id, status=status)
+
 
 async def fn_get_queue_user_telephone(
     telephone: str, 
@@ -40,6 +43,21 @@ async def fn_get_queue_user_telephone(
     status: Optional[QueueStatusEnum] = QueueStatusEnum.active, 
 ) -> Optional[QueueUser]:
     return await queue_users_repo.get_queue_user_telephone(telephone=telephone, status=status) 
+
+
+async def fn_get_queue_users_list(
+        device_id: uuid.UUID,
+        email: str,
+        telephone: str,
+        status: QueueStatusEnum,
+        queue_users_repo: QueueUsersRepository,
+    ) -> List[QueueUser]:
+    return await queue_users_repo.get_queue_users_list(
+        device_id=device_id, 
+        email=email, 
+        telephone=telephone, 
+        status=status
+    ) 
 
 
 

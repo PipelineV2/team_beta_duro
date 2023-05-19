@@ -38,7 +38,7 @@ from app.models.exceptions.crud_exception import (
 # from app.security.requester_auth import get_requester 
 
 router = APIRouter()
-router.prefix = f"/api/requester"
+router.prefix = "/api/requester"
 
 
 class StatusActionEnum(str, Enum):

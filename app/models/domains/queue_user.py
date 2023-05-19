@@ -17,14 +17,13 @@ class QueueBase(PersonBase):
     ...
     
     
-
-class QueueUser(QueueBase, IDModelMixin):
+class QueueUser(QueueBase):
     status: QueueStatusEnum
     time_queued: Optional[datetime]
     time_dequeued: Optional[datetime]
 
 
-class QueueUserDBModel(QueueUser):
+class QueueUserDBModel(QueueUser, IDModelMixin):
     created_by_requester_id: uuid.UUID
     created_by_administrator_id: uuid.UUID
     device_id: uuid.UUID
