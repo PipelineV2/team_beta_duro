@@ -22,6 +22,7 @@ from app.models.domains.queue_user import (
     NewQueueUser,
 )
 from app.models.domains.duro_user import NewDuroUser
+from app.models.core import UpdatedRecord
 from app.models.exceptions.crud_exception import (
     NotFoundException,
     DuplicateDataException,
@@ -59,8 +60,7 @@ async def fn_create_queue_user(
         QueueStatusEnum.active,
         queue_users_repo,
     )
-    print("\n")
-    print("queue_users: ", queue_users)
+    
     # Check if queue user exists
     if queue_users :
         raise DuplicateDataException(current_record_id = uuid.uuid4(), message="A user with these details is on the queue.")
@@ -148,3 +148,36 @@ async def fn_get_queue_users(
     queu_users = await crud.fn_get_queue_users(requester_id, administrator_id, status, queue_users_repo)
     
     return queu_users
+
+
+async def fn_inactivate_queue_user_telephone(
+        coperate_id: uuid.UUID,
+        administrator_id: uuid.UUID,
+        telephone: str,  
+        queue_users_repo: QueueUsersRepository,
+        requesters_repo: RequestersRepository, 
+        requester_administrators_repo: RequesterAdministratorsRepository, 
+        *,
+        status = QueueStatusEnum.inactive,
+    ) -> Optional[UpdatedRecord]:
+    
+    _ = await validate_requester_and_admin(
+        coperate_id, 
+        administrator_id,
+        requesters_repo, 
+        requester_administrators_repo,
+        raise_not_found_exception=True
+    )
+    
+    queue_user = await crud.fn_get_queue_user_telephone(
+        telephone=telephone, 
+        queue_users_repo=queue_users_repo
+    ) 
+    if queue_user is None:
+        raise NotFoundException(message="Telephone number not queued.")
+    
+    return await crud.fn_inactivate_queue_user_telephone(
+        telephone=telephone, 
+        status=status, 
+        queue_users_repo=queue_users_repo
+    )
