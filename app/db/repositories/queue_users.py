@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from app.db.base import BaseRepository
 from app.db.repositories.helpers.crud_helper import delete_by_id
-from app.models.core import DeletedCount, IDModelMixin, RecordStatus, UpdatedRecord
+from app.models.core import IDModelMixin, UpdatedRecord
 from app.models.domains.queue_user import (
     QueueUser,
     QueueStatusEnum,
@@ -33,6 +33,15 @@ SQL_GET_QUEUE_USER_TELEPHONE = """
 
 SQL_GET_QUEUE_USERS_DEVICE_ID_TELEPHONE_EMAIL = """
     SELECT * FROM queue_users WHERE {};
+"""
+
+SQL_INACTIVATE_QUEUE_USER_TELEPHONE = """
+    UPDATE queue_users
+    SET
+    status=:status,
+    updated_at=now()
+    WHERE telephone=:telephone
+    RETURNING id, updated_at;
 """
 
 class QueueUsersRepository(BaseRepository):
@@ -91,7 +100,7 @@ class QueueUsersRepository(BaseRepository):
         queue_user = await self.db.fetch_one(
             query=SQL_GET_QUEUE_USER, values=query_values
         )
-        return QueueUser(**queue_user)
+        return QueueUser(**queue_user) if queue_user else None
     
     
     async def get_queue_user_telephone(
@@ -104,11 +113,12 @@ class QueueUsersRepository(BaseRepository):
             "telephone": telephone,
             "status": status
         }
+        
         queue_user = await self.db.fetch_one(
             query=SQL_GET_QUEUE_USER_TELEPHONE, values=query_values
         )
-        queue_user = QueueUser(**queue_user)
-        return queue_user
+        
+        return QueueUser(**queue_user) if queue_user else None
     
     
     async def get_queue_users_list(
@@ -140,3 +150,19 @@ class QueueUsersRepository(BaseRepository):
             QueueUser(**queue_user)
             for queue_user in queue_users
         ]
+        
+        
+    async def inactivate_queue_user_telephone(
+        self,
+        *,
+        telephone: str, 
+        status: QueueStatusEnum, 
+    ) -> Optional[UpdatedRecord]:
+        query_values = {
+            "telephone": telephone,
+            "status": status
+        }
+        queue_user = await self.db.fetch_one(
+            query=SQL_INACTIVATE_QUEUE_USER_TELEPHONE, values=query_values
+        )
+        return None if queue_user  is None else UpdatedRecord(**queue_user)

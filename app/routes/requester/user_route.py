@@ -124,8 +124,8 @@ async def create_queue_user(
 )
 async def get_queue_user_telephone(
     request: Request,
-    coperate_name: uuid.UUID,
-    administrator_name: uuid.UUID,
+    coperate_name: str,
+    administrator_name: str,
     telehone: str,
     duro_users_repo: QueueUsersRepository = Depends(
         get_repository(QueueUsersRepository)

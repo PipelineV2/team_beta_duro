@@ -1,4 +1,4 @@
-from .crud import  fn_get_requester
+from .crud import  fn_get_requester, validate_requester_and_admin
 from .main import (
     fn_create_requester,
     fn_get_requester_full,

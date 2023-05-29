@@ -14,6 +14,7 @@ from app.apis.requesters import (
 from app.apis.queue import ( 
     fn_create_queue_user,
     fn_get_queue_users,
+    fn_inactivate_queue_user_telephone
 )
 
 from app.core import global_state
@@ -40,7 +41,7 @@ router.prefix = "/api/platform/requesters"
 
 
 @router.get(
-    "/{requester_id}/administrators/{administrator_id}/queue",
+    "/{coperate_id}/administrators/{administrator_id}/queue",
     tags=["platform-requesters-queue"],
     name="platform:requesters:administrator:queue",
     operation_id="platform_requesters_administrator_queue",
@@ -50,7 +51,7 @@ router.prefix = "/api/platform/requesters"
 )
 async def list(
     request: Request,
-    requester_id: uuid.UUID,
+    coperate_id: uuid.UUID,
     administrator_id: uuid.UUID,
     status: Optional[QueueStatusEnum] = QueueStatusEnum.active,
     requesters_repo: RequestersRepository = Depends(
@@ -67,7 +68,7 @@ async def list(
     """
 
     """
-    return await fn_get_queue_users(requester_id, administrator_id, status, requesters_repo, requester_administrators_repo, queue_users_repo)
+    return await fn_get_queue_users(coperate_id, administrator_id, status, requesters_repo, requester_administrators_repo, queue_users_repo)
 
 
 @router.post(
@@ -133,30 +134,6 @@ async def get_requester(
     )
 
 
-# @router.delete(
-#     "/{corporate_id}",
-#     tags=["platform-requesters"],
-#     name="platform:requesters:requester:delete",
-#     operation_id="platform_requesters_requester_delete",
-#     responses={
-#         status.HTTP_200_OK: {"model": DeletedCount},
-#     },
-# )
-# async def delete_requester(
-#     request: Request,
-#     corporate_id: uuid.UUID,
-#     requesters_repo: RequestersRepository = Depends(
-#         get_repository(RequestersRepository)
-#     ),
-#     users_repo: UsersRepository = Depends(get_repository(UsersRepository)),
-#     #_=Depends(platform_user),
-# ) -> DeletedCount:
-#     """
-
-#     """
-#     return await fn_delete_requester(corporate_id, requesters_repo, users_repo)
-
-
 @router.put(
     "/{corporate_id}",
     tags=["platform-requesters"],
@@ -189,4 +166,37 @@ async def update_requester_with_administrator(
         requesters_repo,
         requester_administrators_repo,
         users_repo,
+    )
+
+
+@router.get(
+    "/{coperate_id}/{administrator_id}/dequeue/{telephone}",
+    tags=["queue-users"],
+    name="requester:queue_users:telephone",
+    operation_id="requester_queue_user_telephone",
+    responses={status.HTTP_200_OK: {"model": QueueUser}},
+)
+async def get_queue_user_telephone(
+    request: Request,
+    coperate_id: uuid.UUID,
+    administrator_id: uuid.UUID,
+    telephone: str,
+    queue_users_repo: QueueUsersRepository = Depends(
+        get_repository(QueueUsersRepository)
+    ),
+    requesters_repo: RequestersRepository = Depends(
+        get_repository(RequestersRepository)
+    ),
+    requester_administrators_repo: RequesterAdministratorsRepository = Depends(
+        get_repository(RequesterAdministratorsRepository)
+    ),
+    # auth=Depends(get_requester),
+) -> QueueUser:
+    return await fn_inactivate_queue_user_telephone(
+        coperate_id, 
+        administrator_id, 
+        telephone, 
+        queue_users_repo, 
+        requesters_repo, 
+        requester_administrators_repo 
     )
