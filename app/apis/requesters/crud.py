@@ -154,7 +154,6 @@ async def validate_coporate_name_and_admin_user_name(
         if admin.display_name == administrator:
             admin_id = admin.id
             
-    
     # Check that administrator's id exists
     if admin_id is None:
         raise NotFoundException(message="Requester administrator not found.")

@@ -140,9 +140,7 @@ class QueueUsersRepository(BaseRepository):
 
         condition_str = "TRUE" if not conditions else " OR ".join(conditions)
         if status is not None:
-            print("status is not none")
             condition_str = condition_str + " AND status='{}'".format(status)
-        print("condition_str: ", condition_str)
         query = SQL_GET_QUEUE_USERS_DEVICE_ID_TELEPHONE_EMAIL.format(condition_str)
 
         queue_users = await self.db.fetch_all(query=query)
