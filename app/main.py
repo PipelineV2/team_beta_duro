@@ -41,6 +41,14 @@ app = FastAPI(
     openapi_url="/api/openapi.json",
 )
 
+# Set all CORS enabled origins
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Inject Request Ids
 @app.middleware("http")
@@ -51,16 +59,6 @@ async def request_middleware(request: Request, call_next):
     # add record here.!
     response = await call_next(request)
     return response
-
-
-# Set all CORS enabled origins
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 
 # Register Exceptions
@@ -134,7 +132,6 @@ async def missing_parameters_exception(
             )
         ),
     )
-
 
 
 @app.exception_handler(SendEmailException)
