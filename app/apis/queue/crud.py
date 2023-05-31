@@ -67,5 +67,5 @@ async def fn_inactivate_queue_user_telephone(
         status: QueueStatusEnum, 
         queue_users_repo: QueueUsersRepository,
     ) -> Optional[UpdatedRecord]:
-    print("this status", status)
+
     return await queue_users_repo.inactivate_queue_user_telephone(telephone=telephone, status=status)
