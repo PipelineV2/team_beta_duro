@@ -13,9 +13,10 @@ from app.models.domains.queue_user import (
 
 
 UPSERT_QUEUE_USER = """
-    INSERT INTO queue_users(email, telephone, device_id,  given_name, family_name, display_name, status, job_title, time_queued, time_dequeued, created_by_requester_id, created_by_administrator_id)
-    VALUES(:email, :telephone, :device_id, :given_name, :family_name, :display_name, :status, :job_title, :time_queued, :time_dequeued, :created_by_requester_id, :created_by_administrator_id)
-    RETURNING id, email, telephone, device_id, time_queued;
+    INSERT INTO queue_users(email, telephone, device_id, given_name, family_name, display_name, status, job_title, time_queued, time_dequeued, created_by_requester_id, created_by_administrator_id)
+VALUES(:email, :telephone, :device_id, :given_name, :family_name, :display_name, :status, :job_title, :time_queued, :time_dequeued, :created_by_requester_id, :created_by_administrator_id)
+ON CONFLICT (email, telephone) DO UPDATE SET status = EXCLUDED.status,  device_id = EXCLUDED.device_id
+RETURNING id, email, telephone, device_id, time_queued;
 """
 
 SQL_GET_QUEUE_USERS = """
@@ -132,22 +133,18 @@ class QueueUsersRepository(BaseRepository):
 
         conditions = []
         if device_id is not None:
-            conditions.append("device_id='{}'".format(device_id))
+            conditions.append("( device_id='{}'".format(device_id))
         if email is not None:
             conditions.append("email='{}'".format(email))
         if telephone is not None:
-            conditions.append("telephone='{}'".format(telephone))
+            conditions.append("telephone='{}')".format(telephone))
 
         condition_str = "TRUE" if not conditions else " OR ".join(conditions)
         if status is not None:
             condition_str = condition_str + " AND status='{}'".format(status)
         query = SQL_GET_QUEUE_USERS_DEVICE_ID_TELEPHONE_EMAIL.format(condition_str)
-
-        queue_users = await self.db.fetch_all(query=query)
-        return [
-            QueueUser(**queue_user)
-            for queue_user in queue_users
-        ]
+        queue_user = await self.db.fetch_one(query=query)
+        return  QueueUser(**queue_user) if queue_user else None
         
         
     async def inactivate_queue_user_telephone(

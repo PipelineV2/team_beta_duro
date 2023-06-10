@@ -2,7 +2,7 @@ import uuid
 from enum import Enum
 from typing import List, Optional, Union
 
-from fastapi import APIRouter, Depends, Request, Response, status
+from fastapi import APIRouter, Depends, Request, status
 
 from app.apis.users import (
     # fn_activate_duro_user,
@@ -26,7 +26,7 @@ from app.db.repositories import (
     RequesterAdministratorsRepository,
 )
 from app.models.core import DeletedCount, RecordStatus, UpdatedRecord
-from app.models.domains.queue_user import NewQueueUser, QueueUser
+from app.models.domains.queue_user import NewQueueUser, QueueUser, QueueStatusEnum
 from app.models.domains.duro_user import NewDuroUser
 from app.models.entities.core.email import Email
 from app.models.exceptions.crud_exception import (
@@ -127,6 +127,7 @@ async def get_queue_user_telephone(
     coperate_name: str,
     administrator_name: str,
     telehone: str,
+    status: Optional[QueueStatusEnum] = QueueStatusEnum.inactive,
     duro_users_repo: QueueUsersRepository = Depends(
         get_repository(QueueUsersRepository)
     ),
@@ -144,7 +145,8 @@ async def get_queue_user_telephone(
         telehone, 
         duro_users_repo, 
         requesters_repo, 
-        requester_administrators_repo 
+        requester_administrators_repo,
+        status 
     )
 
 

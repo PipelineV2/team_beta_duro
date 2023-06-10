@@ -172,8 +172,8 @@ async def update_requester_with_administrator(
 @router.get(
     "/{coperate_id}/{administrator_id}/dequeue/{telephone}",
     tags=["queue-users"],
-    name="requester:queue_users:telephone",
-    operation_id="requester_queue_user_telephone",
+    name="requester:queue_users:dequeue:telephone",
+    operation_id="requester_queue_user_dequeue_telephone",
     responses={status.HTTP_200_OK: {"model": QueueUser}},
 )
 async def get_queue_user_telephone(

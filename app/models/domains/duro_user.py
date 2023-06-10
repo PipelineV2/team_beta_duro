@@ -18,7 +18,7 @@ class DuroUserBase(EmailMixin):
 
 class DuroUser(TimestampsMixin, DuroUserBase, IDModelMixin):
     verified_at: Optional[datetime]
-    status: DuroUserStatusEnum
+    status: Optional[DuroUserStatusEnum]
 
 
 class DuroUserDBModel(DuroUser):
