@@ -116,7 +116,7 @@ async def create_queue_user(
 
 
 @router.get(
-    "/{coperate_name}/{administrator_name}/queue_users/",
+    "/{coperate_name}/{administrator_name}/queue_users",
     tags=["queue-users"],
     name="requester:queue_users:telephone",
     operation_id="requester_queue_user_telephone",
