@@ -44,6 +44,10 @@ SQL_INACTIVATE_QUEUE_USER_TELEPHONE = """
     WHERE telephone=:telephone
     RETURNING id, updated_at;
 """
+SQL_DELETE_QUEUE_USER= """
+    DELETE FROM queue_users
+    WHERE device_id=:device_id;
+"""
 
 class QueueUsersRepository(BaseRepository):
     async def create_queue_user(
@@ -161,3 +165,13 @@ class QueueUsersRepository(BaseRepository):
             query=SQL_INACTIVATE_QUEUE_USER_TELEPHONE, values=query_values
         )
         return None if queue_user  is None else UpdatedRecord(**queue_user)
+    
+    
+    
+    async def delete_queue(self, *, device_id: uuid.UUID):
+        query_values = {
+        "device_id": device_id,
+    }
+        deleted_count = await self.db.fetch_one(query=SQL_DELETE_QUEUE_USER, values=query_values)
+        print("delete_queue: ", deleted_count)
+        return deleted_count

@@ -65,6 +65,9 @@ async def fn_create_queue_user(
     if queue_users :
         raise DuplicateDataException(current_record_id = uuid.uuid4(), message="A user with these details is on the queue.")
 
+    # Delete the queue with existing device_id 
+    _ = await crud.fn_delete_queue_user_device_id(user.device_id, queue_users_repo)
+
     # Queue the user
     new_queue_user = await crud.fn_create_queue_user(
         requester_id, 
