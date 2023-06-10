@@ -8,7 +8,7 @@ class PersonBase(EmailMixin):
     given_name: Optional[str]
     family_name: Optional[str]
     display_name: Optional[str]
-    telephone: Optional[str]
+    telephone: str
     job_title: Optional[str]
 
 
