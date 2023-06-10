@@ -69,3 +69,10 @@ async def fn_inactivate_queue_user_telephone(
     ) -> Optional[UpdatedRecord]:
 
     return await queue_users_repo.inactivate_queue_user_telephone(telephone=telephone, status=status)
+
+
+async def fn_delete_queue_user_device_id(
+        device_id: uuid.UUID,
+        queue_users_repo: QueueUsersRepository,
+    ) -> Optional[UpdatedRecord]:
+    return await queue_users_repo.delete_queue(device_id=device_id)
