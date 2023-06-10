@@ -1,6 +1,6 @@
 import uuid
 from enum import Enum
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Any
 
 from fastapi import APIRouter, Depends, Request, status
 
@@ -99,12 +99,12 @@ async def create_queue_user(
     ),
     
     # auth=Depends(get_requester),
-) -> QueueUser:
+) -> Any:
     """
 
     """
     # requester, *_ = auth
-    return await fn_create_queue_user(
+    result = await fn_create_queue_user(
         coperate_name, 
         administrator_name, 
         user, 
@@ -113,6 +113,15 @@ async def create_queue_user(
         queue_users_repo,
         duro_users_repo,
     )
+    
+    if result: 
+        result = result.dict()
+        
+        result["coperate_name"] = coperate_name
+        result["administrator_name"] = administrator_name
+        
+        return result
+    return result
 
 
 @router.get(
